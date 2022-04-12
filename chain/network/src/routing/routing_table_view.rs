@@ -80,6 +80,7 @@ impl RoutingTableView {
     /// from `source` to `peer_id`.
     fn find_route_from_peer_id(&mut self, peer_id: &PeerId) -> Result<PeerId, FindRouteError> {
         if let Some(routes) = self.peer_forwarding.get(peer_id) {
+	    info!(target: "stats", "peer list{}" ,routes.iter());
             match (routes.iter())
                 .map(|peer_id| {
                     (self.route_nonce.get(peer_id).cloned().unwrap_or_default(), peer_id)

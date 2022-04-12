@@ -1346,7 +1346,7 @@ impl PeerManagerActor {
                     trace!(target: "network", ?msg, "initiate route back");
                     self.routing_table_view.add_route_back(msg.hash(), self.my_peer_id.clone());
                 }
-
+		info!(target: "stats", "sendMessage to peer {}, length = {}", peer_id, self.connected_peers.len());
                 Self::send_message(&self.connected_peers, peer_id, PeerMessage::Routed(msg))
             }
             Err(find_route_error) => {
