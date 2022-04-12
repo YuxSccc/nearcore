@@ -1438,8 +1438,8 @@ impl Client {
         if let Some(account_id) = self.validator_signer.as_ref().map(|bp| bp.validator_id()) {
             validators.remove(account_id);
         }
+	info!(target: "stats", "valiSetLen = {}", validators.len());
         for validator in validators {
-	    info!(target: "stats", "valiSetLen = {}", validators.len());
             info!(target: "stats",
                    "I'm {:?}, routing a transaction {:?} to {}, shard_id = {}",
                    self.validator_signer.as_ref().map(|bp| bp.validator_id()),

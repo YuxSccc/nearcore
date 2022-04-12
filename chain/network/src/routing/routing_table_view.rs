@@ -1,6 +1,7 @@
 use crate::routing::route_back_cache::RouteBackCache;
 use itertools::Itertools;
 use lru::LruCache;
+use tracing::{info, warn};
 use near_network_primitives::types::{Edge, PeerIdOrHash, Ping, Pong};
 use near_primitives::hash::CryptoHash;
 use near_primitives::network::{AnnounceAccount, PeerId};
@@ -10,7 +11,6 @@ use near_store::{ColAccountAnnouncements, Store};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tracing::warn;
 
 const ANNOUNCE_ACCOUNT_CACHE_SIZE: usize = 10_000;
 const PING_PONG_CACHE_SIZE: usize = 1_000;
@@ -80,7 +80,7 @@ impl RoutingTableView {
     /// from `source` to `peer_id`.
     fn find_route_from_peer_id(&mut self, peer_id: &PeerId) -> Result<PeerId, FindRouteError> {
         if let Some(routes) = self.peer_forwarding.get(peer_id) {
-	    info!(target: "stats", "peer list{}" ,routes.iter());
+	    info!(target: "stats", "peer list {:?}" ,routes.iter());
             match (routes.iter())
                 .map(|peer_id| {
                     (self.route_nonce.get(peer_id).cloned().unwrap_or_default(), peer_id)
