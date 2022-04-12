@@ -1417,7 +1417,7 @@ impl Client {
 
         let mut validators = HashSet::new();
         for horizon in
-            (2..=TX_ROUTING_HEIGHT_HORIZON).chain(vec![TX_ROUTING_HEIGHT_HORIZON * 2].into_iter())
+            (1..=(TX_ROUTING_HEIGHT_HORIZON + 2)).chain(vec![TX_ROUTING_HEIGHT_HORIZON * 2].into_iter())
         {
             let validator =
                 self.chain.find_chunk_producer_for_forwarding(epoch_id, shard_id, horizon)?;
@@ -1439,7 +1439,8 @@ impl Client {
             validators.remove(account_id);
         }
         for validator in validators {
-            debug!(target: "client",
+	    info!(target: "stats", "valiSetLen = {}", validators.len());
+            info!(target: "stats",
                    "I'm {:?}, routing a transaction {:?} to {}, shard_id = {}",
                    self.validator_signer.as_ref().map(|bp| bp.validator_id()),
                    tx,
@@ -1462,6 +1463,7 @@ impl Client {
         is_forwarded: bool,
         check_only: bool,
     ) -> NetworkClientResponses {
+        warn!(target: "client", "PROCESS TS");
         unwrap_or_return!(self.process_tx_internal(&tx, is_forwarded, check_only), {
             let me = self.validator_signer.as_ref().map(|vs| vs.validator_id());
             warn!(target: "client", "I'm: {:?} Dropping tx: {:?}", me, tx);
@@ -1539,6 +1541,12 @@ impl Client {
 
         let shard_id =
             self.runtime_adapter.account_id_to_shard_id(&tx.transaction.signer_id, &epoch_id)?;
+	info!(target: "stats",
+	      "LOG1: I'm {:?}, routing a transaction {:?}, shard_id = {}",
+              self.validator_signer.as_ref().map(|bp| bp.validator_id()),
+              tx,
+	      shard_id
+	);
         if self.runtime_adapter.cares_about_shard(me, &head.last_block_hash, shard_id, true)
             || self.runtime_adapter.will_care_about_shard(me, &head.last_block_hash, shard_id, true)
         {

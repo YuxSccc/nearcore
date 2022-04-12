@@ -151,7 +151,7 @@ impl InfoHelper {
         });
         let machine_info_log = proc_info
             .as_ref()
-            .map(|(cpu, mem)| format!(" CPU: {:.0}%, Mem: {}", cpu, pretty_bytes(mem * 1024)));
+            .map(|(cpu, mem)| format!(" CPUNB: {:.0}%, Mem: {}", cpu, pretty_bytes(mem * 1024)));
 
         info!(
             target: "stats", "{}{}{}{}{}",
