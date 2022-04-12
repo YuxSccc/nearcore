@@ -78,9 +78,11 @@ impl RoutingTableView {
 
     /// Find peer that is connected to `source` and belong to the shortest path
     /// from `source` to `peer_id`.
-    fn find_route_from_peer_id(&mut self, peer_id: &PeerId) -> Result<PeerId, FindRouteError> {
+    fn find_route_from_peer_id(&mut self, peer_id: &PeerId, debug_log: bool) -> Result<PeerId, FindRouteError> {
         if let Some(routes) = self.peer_forwarding.get(peer_id) {
-	    info!(target: "stats", "peer list {:?}" ,routes.iter());
+	    if debug_log {
+	    	info!(target: "stats", "peer list {:?}" ,routes.iter());
+	    }
             match (routes.iter())
                 .map(|peer_id| {
                     (self.route_nonce.get(peer_id).cloned().unwrap_or_default(), peer_id)
@@ -111,9 +113,9 @@ impl RoutingTableView {
         }
     }
 
-    pub(crate) fn find_route(&mut self, target: &PeerIdOrHash) -> Result<PeerId, FindRouteError> {
+    pub(crate) fn find_route(&mut self, target: &PeerIdOrHash, debug_log: bool) -> Result<PeerId, FindRouteError> {
         match target {
-            PeerIdOrHash::PeerId(peer_id) => self.find_route_from_peer_id(peer_id),
+            PeerIdOrHash::PeerId(peer_id) => self.find_route_from_peer_id(peer_id, debug_log),
             PeerIdOrHash::Hash(hash) => {
                 self.fetch_route_back(*hash).ok_or(FindRouteError::RouteBackNotFound)
             }

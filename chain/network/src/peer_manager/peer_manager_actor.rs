@@ -1338,15 +1338,17 @@ impl PeerManagerActor {
                 return false;
             }
         }
-
-        match self.routing_table_view.find_route(&msg.target) {
+	
+        match self.routing_table_view.find_route(&msg.target, matches!(msg.body, RoutedMessageBody::ForwardTx(_))) {
             Ok(peer_id) => {
                 // Remember if we expect a response for this message.
                 if msg.author == self.my_peer_id && msg.expect_response() {
                     trace!(target: "network", ?msg, "initiate route back");
                     self.routing_table_view.add_route_back(msg.hash(), self.my_peer_id.clone());
                 }
-		info!(target: "stats", "sendMessage to peer {}, length = {}", peer_id, self.connected_peers.len());
+                if let RoutedMessageBody::ForwardTx(ref tx) = msg.body {
+                    info!(target: "stats", "sendMessage to peer {}, length = {}, msg = {}", peer_id, self.connected_peers.len(), tx.get_hash());
+                }
                 Self::send_message(&self.connected_peers, peer_id, PeerMessage::Routed(msg))
             }
             Err(find_route_error) => {
